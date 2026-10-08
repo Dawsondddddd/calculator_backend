@@ -1,3 +1,5 @@
+import os
+
 from flask import Flask, jsonify, request
 
 from calculator import ExpressionError, calculate
@@ -9,8 +11,9 @@ from database import (
     save_history,
 )
 
-HOST = "127.0.0.1"
-PORT = 8000
+HOST = os.environ.get("HOST", "0.0.0.0")
+PORT = int(os.environ.get("PORT", "8000"))
+DEBUG = os.environ.get("FLASK_DEBUG") == "1"
 
 app = Flask(__name__)
 init_db()
@@ -84,4 +87,4 @@ def handle_method_not_allowed(error):
 
 
 if __name__ == "__main__":
-    app.run(host=HOST, port=PORT, debug=True)
+    app.run(host=HOST, port=PORT, debug=DEBUG)

@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: calculator-backend
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    healthCheckPath: /api/health
+    envVars:
+      - key: HOST
+        value: 0.0.0.0

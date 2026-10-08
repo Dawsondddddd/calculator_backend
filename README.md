@@ -41,11 +41,14 @@ cd backend
 python app.py
 ```
 
-启动成功后输出：
+启动成功后会打印监听地址，其中包含：
 
 ```
+ * Running on all addresses (0.0.0.0)
  * Running on http://127.0.0.1:8000
 ```
+
+本机访问用 <http://127.0.0.1:8000> 即可。
 
 > `127.0.0.1` 是本机回环地址，只在本机启动服务后可访问，不要把这个地址当作公网地址分享给别人。
 
@@ -57,12 +60,13 @@ python app.py
 
 ## 配置说明
 
-所有配置都在 `app.py` 顶部：
+所有配置都在 `app.py` 顶部，并且都可以用环境变量覆盖（云平台部署时会自动注入 `PORT`）：
 
 | 配置项 | 默认值 | 说明 |
 | --- | --- | --- |
-| `HOST` | `127.0.0.1` | 监听地址 |
+| `HOST` | `0.0.0.0` | 监听地址，`0.0.0.0` 表示本机和局域网都能访问 |
 | `PORT` | `8000` | 监听端口 |
+| `FLASK_DEBUG` | 空 | 设为 `1` 时开启调试模式 |
 
 数据库文件和表达式长度限制分别在 `database.py`、`calculator.py` 中：
 
@@ -139,3 +143,19 @@ python app.py
 ## 前后端连接方式
 
 后端默认监听 `http://127.0.0.1:8000`，并通过 `after_request` 对所有响应添加 CORS 头（`Access-Control-Allow-Origin: *`），前端可以跨端口或直接用 `file://` 打开时访问。
+
+## 部署到 Render
+
+仓库里已经带好 `render.yaml`，可以直接用 Render 的 Blueprint 流程部署到公网：
+
+1. 打开 <https://dashboard.render.com/blueprints>，选择用 GitHub 账号登录并授权；
+2. 点 `New Blueprint Instance`，选中本仓库 `calculator_backend`，分支选 `main`；
+3. Render 会自动读取 `render.yaml`：免费套餐、`pip install -r requirements.txt` 构建、`gunicorn app:app` 启动、健康检查路径 `/api/health`；
+4. 点 `Apply`，等待构建和部署完成，会得到一个形如 `https://calculator-backend-xxxx.onrender.com` 的公网地址。
+
+验证方式：浏览器打开 `https://<你的地址>/api/health`，返回 `{"success": true, "message": "ok"}` 就说明后端已经在公网运行。
+
+两点需要知道：
+
+- 免费实例在一段时间没有请求后会休眠，下一次访问要等几十秒冷启动；
+- 免费实例的磁盘是临时的，`calculator.db` 会随着重新部署或实例重启而重置，历史记录会清空。需要长期保存数据要挂载持久化磁盘或改用外部数据库。
