@@ -5,3 +5,5 @@ calculator.db
 .idea/
 .vscode/
 .DS_Store
+server.log
+server.err.log

@@ -52,6 +52,28 @@ python app.py
 
 > `127.0.0.1` 是本机回环地址，只在本机启动服务后可访问，不要把这个地址当作公网地址分享给别人。
 
+## 公网访问（Cloudflare Tunnel）
+
+要让别人也能打开前端并真正完成计算，后端需要有一个公网地址。这里用 Cloudflare Tunnel 的 quick tunnel，不需要账号和信用卡：
+
+```bash
+cloudflared tunnel --url http://127.0.0.1:8000
+```
+
+启动后终端会打印一个 `https://xxxx.trycloudflare.com` 地址，把它填到前端的 `API_BASE` 即可。当前公开 Demo 使用：
+
+<https://humanitarian-consecutive-makes-deeper.trycloudflare.com>
+
+> quick tunnel 没有可用性保证，只在 `cloudflared` 进程运行期间有效，重启后会分配新地址。
+
+### 长期稳定部署
+
+需要 7x24 在线的地址时，可任选一种：
+
+- 云平台部署 Flask 应用（如 PythonAnywhere、Railway、Fly.io），得到固定域名；
+- Cloudflare 账号 + named tunnel，绑定自己的域名；
+- 自备服务器跑 `gunicorn app:app`，前面再加 Nginx。
+
 如果前端页面提示「无法连接后端服务」，按顺序检查：
 
 1. 运行 `app.py` 的终端窗口没有关闭，输出中有 `Running on http://127.0.0.1:8000`；
